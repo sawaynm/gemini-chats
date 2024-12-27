@@ -1,0 +1,15 @@
+# Use an official Node.js LTS image
+FROM node:18-bullseye
+
+# Create and set the working directory
+WORKDIR /workspace
+
+# Copy package files and install dependencies (optional optimization)
+# COPY package*.json /workspace/
+# RUN npm install
+
+# Expose the debug port
+EXPOSE 9229
+
+# Default command (optional)
+CMD [ "bash" ]

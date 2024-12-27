@@ -1,5 +1,24 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
-  "features": {
-  }
+  "name": "Node.js Dev Container",
+  "dockerFile": "Dockerfile",
+  // You can specify or override environment variables here
+  "containerEnv": {
+    "NODE_ENV": "development"
+  },
+  // Forward the default Node debug port
+  "forwardPorts": [9229],
+  // Set up VS Code extensions you might need
+  "extensions": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode"
+  ],
+  // Mount the project in the Docker container
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace",
+  // Specify run arguments, like installing required dependencies or tools
+  "runArgs": [
+    "--init"
+  ],
+  // Override the default user to avoid permission issues on Linux
+  "remoteUser": "node"
 }

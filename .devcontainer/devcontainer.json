@@ -1,24 +1,36 @@
 {
-  "name": "Node.js Dev Container",
-  "dockerFile": "Dockerfile",
-  // You can specify or override environment variables here
-  "containerEnv": {
-    "NODE_ENV": "development"
+  "name": "Gemini Chat Development",
+  "build": {
+    "dockerfile": "Dockerfile"
   },
-  // Forward the default Node debug port
-  "forwardPorts": [9229],
-  // Set up VS Code extensions you might need
+  "forwardPorts": [3000],
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  },
   "extensions": [
     "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode"
+    "esbenp.prettier-vscode",
+    "dsznajder.es7-react-js-snippets",
+    "ms-vscode.vscode-typescript-next"
   ],
-  // Mount the project in the Docker container
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
-  "workspaceFolder": "/workspace",
-  // Specify run arguments, like installing required dependencies or tools
-  "runArgs": [
-    "--init"
-  ],
-  // Override the default user to avoid permission issues on Linux
-  "remoteUser": "node"
+  "remoteUser": "node",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
+    }
+  },
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.tabSize": 2,
+        "files.eol": "\n"
+      }
+    }
+  }
 }

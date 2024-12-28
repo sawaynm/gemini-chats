@@ -1,258 +1,102 @@
-import { useState, useRef, useEffect } from "react";
-import { DOMPurify } from 'dompurify';
-import ChatMessage from "./ChatMessage";
-import LoadingSpinner from "./LoadingSpinner";
-import { fetchGeminiResponse } from "../utils/api";
-import { config } from "../utils/config";
+import React, { useState, useEffect } from 'react';
+import { sendMessageToGemini } from '../utils/api';
+import { useSession } from 'next-auth/react';
 
-export default function ChatBox() {
+const ChatBox = () => {
+  const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [filters, setFilters] = useState(config.SAFETY_FILTERS);
-  const [model, setModel] = useState(config.DEFAULT_MODEL);
-  
-  const messagesEndRef = useRef(null);
-  const chatContainerRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const { data: session } = useSession();
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch('/api/messages');
+        if (response.ok) {
+          const data = await response.json();
+          setMessages(data);
+        } else {
+          console.error('Failed to fetch messages');
+        }
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
 
-  const sanitizeInput = (input) => {
-    return DOMPurify.sanitize(input.trim());
-  };
+    fetchMessages();
+  }, []);
 
-  const addMessage = (newMessage) => {
-    setMessages(prevMessages => {
-      const updatedMessages = [...prevMessages, newMessage];
-      return updatedMessages.length > config.MAX_MESSAGES 
-        ? updatedMessages.slice(-config.MAX_MESSAGES) 
-        : updatedMessages;
-    });
-  };
+  const handleSendMessage = async () => {
+    if (!session) {
+      alert('Please sign in to send a message.');
+      return;
+    }
 
-  const sendMessage = async (e) => {
-    e?.preventDefault();
-    
-    const sanitizedInput = sanitizeInput(input);
-    if (!sanitizedInput || isLoading) return;
+    if (message.trim()) {
+      try {
+        // Send message to Gemini
+        const geminiResponse = await sendMessageToGemini(message);
+        setMessages([...messages, { role: 'user', content: message }, geminiResponse]);
+        setMessage('');
 
-    const userMessage = { role: "user", message: sanitizedInput };
-    addMessage(userMessage);
-    setInput("");
-    setIsLoading(true);
+        // Persist message to backend
+        const response = await fetch('/api/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message }),
+        });
 
-    try {
-      const response = await fetchGeminiResponse(sanitizedInput, model, filters);
-      addMessage({ role: "assistant", message: response });
-    } catch (error) {
-      addMessage({ 
-        role: "assistant", 
-        message: error.message || "An error occurred while processing your request.", 
-        isError: true 
-      });
-    } finally {
-      setIsLoading(false);
+        if (!response.ok) {
+          console.error('Failed to save message');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        // Handle error, e.g., display an error message to the user
+      }
     }
   };
 
-  return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        {/* Chat Header */}
-        <div className="bg-blue-600 p-4 text-white">
-          <h1 className="text-xl font-bold">Gemini Chat</h1>
-        </div>
-
-        {/* Chat Messages */}
-        <div 
-          ref={chatContainerRef}
-          className="p-4 h-[60vh] overflow-y-auto"
-          role="log"
-          aria-live="polite"
-        >
-          {messages.map((msg, idx) => (
-            <ChatMessage 
-              key={idx}
-              message={msg.message}
-              role={msg.role}
-import { useState, useRef, useEffect } from "react";
-import DOMPurify from 'dompurify'; // Fix import
-import PropTypes from 'prop-types';
-import ChatMessage from "./ChatMessage";
-import LoadingSpinner from "./LoadingSpinner";
-import { fetchGeminiResponse } from "../utils/api";
-import { config } from "../utils/config";
-
-export default function ChatBox() {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [filters, setFilters] = useState(config.SAFETY_FILTERS);
-  const [model, setModel] = useState(config.DEFAULT_MODEL);
-
-  const messagesEndRef = useRef(null);
-  const chatContainerRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const sanitizeInput = (input) => {
-    return DOMPurify.sanitize(input.trim());
-  };
-
-  const addMessage = (newMessage) => {
-    setMessages(prevMessages => {
-      const updatedMessages = [...prevMessages, newMessage];
-      return updatedMessages.length > config.MAX_MESSAGES 
-        ? updatedMessages.slice(-config.MAX_MESSAGES) 
-        : updatedMessages;
-    });
-  };
-
-  const sendMessage = async (e) => {
-    e?.preventDefault();
-
-    const sanitizedInput = sanitizeInput(input);
-    if (!sanitizedInput || isLoading) return;
-
-    const userMessage = { role: "user", message: sanitizedInput };
-    addMessage(userMessage);
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      const response = await fetchGeminiResponse(sanitizedInput, model, filters);
-      addMessage({ role: "assistant", message: response });
-    } catch (error) {
-      addMessage({ 
-        role: "assistant", 
-        message: error.message || "An error occurred while processing your request.", 
-        isError: true 
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (!session) {
+    return (
+      <div className="p-4">
+        Please sign in to use the chat.
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        {/* Chat Header */}
-        <div className="bg-blue-600 p-4 text-white">
-          <h1 className="text-xl font-bold">Gemini Chat</h1>
-        </div>
-
-        {/* Chat Messages */}
-        <div 
-          ref={chatContainerRef}
-          className="p-4 h-[60vh] overflow-y-auto"
-          role="log"
-          aria-live="polite"
-        >
-          {messages.map((msg, idx) => (
-            <ChatMessage 
-              key={idx}
-              message={msg.message}
-              role={msg.role}
-              isError={msg.isError}
-            />
-          ))}
-          {isLoading && <LoadingSpinner />}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Controls */}
-        <div className="border-t p-4">
-          <div className="mb-4 flex gap-4">
-            <select
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="p-2 border rounded-md flex-1"
-              aria-label="Select AI model"
-            >
-              <option value="gemini-pro">Gemini Pro</option>
-              <option value="gemini-pro-vision">Gemini Pro Vision</option>
-            </select>
-            <div className="flex items-center gap-2">
-              <label htmlFor="safety-filters">Safety Filters:</label>
-              <input
-                id="safety-filters"
-                type="checkbox"
-                checked={filters}
-                onChange={() => setFilters(!filters)}
-                className="form-checkbox h-5 w-5 text-blue-600"
-              />
-            </div>
+    <div className="flex flex-col h-full">
+      <div className="flex-grow overflow-y-auto p-4">
+        {messages.map((msg, index) => (
+          <div key={index}>
+            {msg.role ? (
+              <div>
+                <strong>{msg.role}:</strong> {msg.content}
+              </div>
+            ) : (
+              <div>{msg}</div>
+            )}
           </div>
-
-          {/* Input Form */}
-          <form onSubmit={sendMessage} className="flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="flex-1 p-2 border rounded-md"
-              placeholder="Type your message..."
-              aria-label="Chat input"
-              disabled={isLoading}
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !input.trim()}
-              className={`px-4 py-2 rounded-md text-white transition-colors ${
-                isLoading || !input.trim() 
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600'
-              }`}
-              aria-label="Send message"
-            >
-              {isLoading ? 'Sending...' : 'Send'}
-            </button>
-          </form>
-        </div>
+        ))}
+      </div>
+      <div className="p-4 flex">
+        <input
+          type="text"
+          className="flex-grow rounded-l-md border-gray-300 border p-2"
+          placeholder="Enter your message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <button
+          className="bg-blue-500 text-white rounded-r-md px-4 py-2"
+          onClick={handleSendMessage}
+        >
+          Send
+        </button>
       </div>
     </div>
   );
-}
+};
 
-// Add PropTypes for better type checking
-ChatBox.propTypes = {
-  role: PropTypes.string.isRequired,
-  message: PropTypes.string.isRequired,
-  isError: PropTypes.bool
-};           value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="flex-1 p-2 border rounded-md"
-              placeholder="Type your message..."
-              aria-label="Chat input"
-              disabled={isLoading}
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !input.trim()}
-              className={`px-4 py-2 rounded-md text-white transition-colors ${
-                isLoading || !input.trim() 
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-500 hover:bg-blue-600'
-              }`}
-              aria-label="Send message"
-            >
-              {isLoading ? 'Sending...' : 'Send'}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-}
+export default ChatBox;

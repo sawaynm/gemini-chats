@@ -16,5 +16,13 @@
       ]
     }
   ],
-  "cleanUrls": true
+  "cleanUrls": true,
+  "buildCommand": "cd Chatbox-gemini && npm install && npm run build",
+  "outputDirectory": "Chatbox-gemini/.next",
+  "installCommand": "cd Chatbox-gemini && npm install",
+  "rootDirectory": "Chatbox-gemini",
+  "env": {
+    "GEMINI_API_KEY": "@gemini_api_key",
+    "NEXTAUTH_SECRET": "@nextauth_secret"
+  }
 }

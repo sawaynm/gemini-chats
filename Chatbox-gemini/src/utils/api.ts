@@ -1,4 +1,3 @@
-
 import axios from "axios";
 
 interface GeminiApiResponse {
@@ -46,7 +45,8 @@ const API_KEY = process.env.GEMINI_API_KEY;
 
 export async function fetchGeminiResponse(
   prompt: string,
-  config: Partial<GeminiConfig> = {}
+  config: Partial<GeminiConfig> = {},
+  attachment?: File | null
 ): Promise<GeminiResponse> {
   if (!API_KEY) {
     throw new GeminiError("API key not configured", 401);
@@ -56,11 +56,11 @@ export async function fetchGeminiResponse(
 
   try {
     const headers = {
-      "Content-Type": "application/json",
+      "Content-Type": attachment ? "multipart/form-data" : "application/json",
       "x-goog-api-key": API_KEY,
     };
 
-    const payload = {
+    const payload: any = {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: {
         temperature,
@@ -86,15 +86,29 @@ export async function fetchGeminiResponse(
       ] : [],
     };
 
-    const response = await axios.post<GeminiApiResponse>(API_ENDPOINT, payload, { headers });
-
-    if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-      return {
-        text: response.data.candidates[0].content.parts[0].text,
-        usage: response.data.usage,
-      };
+    if (attachment) {
+      const formData = new FormData();
+      formData.append("file", attachment);
+      formData.append("payload", JSON.stringify(payload));
+      const response = await axios.post<GeminiApiResponse>(API_ENDPOINT, formData, { headers });
+      if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+        return {
+          text: response.data.candidates[0].content.parts[0].text,
+          usage: response.data.usage,
+        };
+      } else {
+        throw new GeminiError("Invalid response structure from Gemini API", 500);
+      }
     } else {
-      throw new GeminiError("Invalid response structure from Gemini API", 500);
+      const response = await axios.post<GeminiApiResponse>(API_ENDPOINT, payload, { headers });
+      if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+        return {
+          text: response.data.candidates[0].content.parts[0].text,
+          usage: response.data.usage,
+        };
+      } else {
+        throw new GeminiError("Invalid response structure from Gemini API", 500);
+      }
     }
   } catch (error: any) {
     console.error("Error fetching Gemini response:", error);

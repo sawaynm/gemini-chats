@@ -29,6 +29,7 @@ export default function ChatBox() {
   const [theme, setTheme] = useState("light");
   const [textSize, setTextSize] = useState("text-base");
   const [highContrast, setHighContrast] = useState(false);
+  const [attachment, setAttachment] = useState<File | null>(null);
 
   useEffect(() => {
     const conversations = ChatStorage.getConversations();
@@ -38,7 +39,7 @@ export default function ChatBox() {
   }, []);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() && !attachment) return;
 
     const newMessage: ChatMessageType = {
       id: uuidv4(),
@@ -65,7 +66,7 @@ export default function ChatBox() {
         temperature: 0.7
       };
 
-      const response = await fetchGeminiResponse(input, config);
+      const response = await fetchGeminiResponse(input, config, attachment);
 
       const assistantMessage: ChatMessageType = {
         id: uuidv4(),
@@ -95,6 +96,7 @@ export default function ChatBox() {
       });
     } finally {
       setIsTyping(false);
+      setAttachment(null);
     }
   };
 
@@ -139,6 +141,11 @@ export default function ChatBox() {
           onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
           className={`flex-1 p-2 border rounded-md ${textSize}`}
           placeholder="Type a message..."
+        />
+        <input
+          type="file"
+          onChange={(e) => setAttachment(e.target.files ? e.target.files[0] : null)}
+          className="p-2 border rounded-md"
         />
         <button
           onClick={sendMessage}

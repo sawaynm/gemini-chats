@@ -11,6 +11,7 @@ A modern chat interface powered by Google's Gemini AI models, built with Next.js
 - Clean and responsive UI with Tailwind CSS
 - Safety filter toggle
 - Mobile-friendly design
+- File attachment support
 
 ## Getting Started
 
@@ -49,3 +50,14 @@ npm start
 You can deploy this project to Vercel by clicking the button below:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsawaynm%2Fgemini-chat)
+
+## Using the Attachment Feature
+
+The chatbox now supports file attachments. You can upload files during your chat session. Here's how to use the attachment feature:
+
+1. Click on the file input button next to the message input field.
+2. Select the file you want to attach.
+3. Type your message (optional).
+4. Click the "Send" button to send your message along with the attachment.
+
+The attachment will be processed and included in the conversation.

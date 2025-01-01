@@ -30,9 +30,16 @@ jobs:
       run: npm run build --if-present
 
     - name: Setup environment variables
-      run: echo "REACT_APP_GEMINI_API_KEY=${{ secrets.REACT_APP_GEMINI_API_KEY }}" >> $GITHUB_ENV
+      run: |
+        echo "REACT_APP_GEMINI_API_KEY=${{ secrets.REACT_APP_GEMINI_API_KEY }}" >> $GITHUB_ENV
+        echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
+        echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> $GITHUB_ENV
+        echo "REACT_APP_API_ENDPOINT=${{ secrets.REACT_APP_API_ENDPOINT }}" >> $GITHUB_ENV
       env:
         REACT_APP_GEMINI_API_KEY: ${{ secrets.REACT_APP_GEMINI_API_KEY }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+        REACT_APP_API_ENDPOINT: ${{ secrets.REACT_APP_API_ENDPOINT }}
 
     - name: Run tests
       run: npm test

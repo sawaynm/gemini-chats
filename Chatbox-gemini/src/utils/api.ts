@@ -56,7 +56,7 @@ export async function fetchGeminiResponse(
 
   try {
     const headers = {
-      "Content-Type": "application/json",
+      "Content-Type": attachment ? "multipart/form-data" : "application/json",
       "x-goog-api-key": API_KEY,
     };
 

@@ -1,6 +1,6 @@
 module.exports = {
   env: {
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY || 'edefault-gemini-api-key',
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   },
   async redirects() {
     return [

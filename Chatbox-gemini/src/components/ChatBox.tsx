@@ -6,6 +6,9 @@ import { fetchGeminiResponse, GeminiConfig } from "../utils/api";
 import { ErrorBoundary } from "./ErrorBoundary";
 import ChatMessageComponent from "./ChatMessage";
 import LoadingSpinner from "./LoadingSpinner";
+import ReactMarkdown from 'react-markdown';
+import gfm from 'remark-gfm';
+import emoji from 'emoji-dictionary';
 
 interface ChatMessageProps {
   key: string;
@@ -21,8 +24,11 @@ export default function ChatBox() {
   });
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [filters, setFilters] = useState(true);
+  const [filters, setFilters] = useState(false);
   const [model, setModel] = useState("gemini-pro");
+  const [theme, setTheme] = useState("light");
+  const [textSize, setTextSize] = useState("text-base");
+  const [highContrast, setHighContrast] = useState(false);
 
   useEffect(() => {
     const conversations = ChatStorage.getConversations();
@@ -92,11 +98,36 @@ export default function ChatBox() {
     }
   };
 
+  const renderMessage = (message: string) => {
+    return (
+      <ReactMarkdown
+        plugins={[gfm]}
+        children={message}
+        transformImageUri={(uri) => uri.startsWith('http') ? uri : `${process.env.PUBLIC_URL}/${uri}`}
+        renderers={{
+          text: ({ value }) => value.replace(/:\w+:/gi, (name) => emoji.getUnicode(name) || name),
+        }}
+      />
+    );
+  };
+
+  const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setTheme(e.target.value);
+  };
+
+  const handleTextSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setTextSize(e.target.value);
+  };
+
+  const handleHighContrastChange = () => {
+    setHighContrast(!highContrast);
+  };
+
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+    <div className={`max-w-lg mx-auto p-6 rounded-lg shadow-md ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"} ${highContrast ? "high-contrast" : ""}`}>
       <div className="mb-4 max-h-[60vh] overflow-y-auto">
         {conversation.messages.map((msg) => (
-          <ChatMessageComponent key={msg.id} message={msg.message} role={msg.role} />
+          <ChatMessageComponent key={msg.id} message={renderMessage(msg.message)} role={msg.role} />
         ))}
         {isTyping && <div className="text-center"><LoadingSpinner /></div>}
       </div>
@@ -106,7 +137,7 @@ export default function ChatBox() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-          className="flex-1 p-2 border rounded-md"
+          className={`flex-1 p-2 border rounded-md ${textSize}`}
           placeholder="Type a message..."
         />
         <button
@@ -118,7 +149,7 @@ export default function ChatBox() {
       </div>
       <div className="mt-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <label htmlFor="modelSelect" className="text-sm font-medium text-gray-700">Model:</label>
+          <label htmlFor="modelSelect" className="text-sm font-medium">Model:</label>
           <select
             id="modelSelect"
             value={model}
@@ -130,12 +161,49 @@ export default function ChatBox() {
           </select>
         </div>
         <div className="flex items-center space-x-2">
-          <label htmlFor="filterCheckbox" className="text-sm font-medium text-gray-700">Safety Filters:</label>
+          <label htmlFor="filterCheckbox" className="text-sm font-medium">Safety Filters:</label>
           <input
             id="filterCheckbox"
             type="checkbox"
             checked={filters}
             onChange={() => setFilters(!filters)}
+            className="rounded-md"
+          />
+        </div>
+      </div>
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <label htmlFor="themeSelect" className="text-sm font-medium">Theme:</label>
+          <select
+            id="themeSelect"
+            value={theme}
+            onChange={handleThemeChange}
+            className="p-2 border rounded-md text-sm"
+          >
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        <div className="flex items-center space-x-2">
+          <label htmlFor="textSizeSelect" className="text-sm font-medium">Text Size:</label>
+          <select
+            id="textSizeSelect"
+            value={textSize}
+            onChange={handleTextSizeChange}
+            className="p-2 border rounded-md text-sm"
+          >
+            <option value="text-sm">Small</option>
+            <option value="text-base">Medium</option>
+            <option value="text-lg">Large</option>
+          </select>
+        </div>
+        <div className="flex items-center space-x-2">
+          <label htmlFor="highContrastCheckbox" className="text-sm font-medium">High Contrast:</label>
+          <input
+            id="highContrastCheckbox"
+            type="checkbox"
+            checked={highContrast}
+            onChange={handleHighContrastChange}
             className="rounded-md"
           />
         </div>

@@ -12,6 +12,8 @@ A modern chat interface powered by Google's Gemini AI models, built with Next.js
 - Safety filter toggle
 - Mobile-friendly design
 - File attachment support
+- User customization options for theme, font size, and layout
+- Enhanced error handling
 
 ## Getting Started
 
@@ -61,3 +63,40 @@ The chatbox now supports file attachments. You can upload files during your chat
 4. Click the "Send" button to send your message along with the attachment.
 
 The attachment will be processed and included in the conversation.
+
+## User Customization Options
+
+The chatbox now includes several user customization options to enhance your experience:
+
+1. **Theme**: You can switch between light and dark themes.
+2. **Font Size**: Adjust the font size to small, medium, or large for better readability.
+3. **Layout**: Choose between different chatbox layouts (e.g., compact, expanded).
+4. **High Contrast**: Enable high contrast mode for better accessibility.
+
+## Mobile-Friendly Design
+
+The chatbox is designed to be mobile-friendly, ensuring a seamless user experience across different devices. It uses responsive design techniques with Tailwind CSS to adapt to various screen sizes and provide touch-friendly interactions.
+
+## Enhanced Error Handling
+
+The chatbox includes enhanced error handling to provide a better user experience:
+
+1. **User-Friendly Error Messages**: Inform users about issues with clear and concise error messages.
+2. **Error Boundary Component**: Catch and handle errors in the React component tree.
+3. **Fallback UI**: Provide a fallback UI to inform users when something goes wrong.
+4. **Input Validation**: Validate user input and handle cases where the input is invalid or empty.
+
+## Optimized Performance
+
+The chatbox performance is optimized by:
+
+1. **Minimizing API Calls**: Reduce the number of API calls by batching requests or using debouncing techniques.
+2. **Optimizing Image Loading**: Use optimized images and lazy loading techniques.
+3. **Efficient State Management**: Ensure efficient state updates and avoid unnecessary re-renders.
+4. **Caching**: Use caching mechanisms to store frequently accessed data.
+5. **Optimizing CSS and JavaScript**: Minimize and compress CSS and JavaScript files.
+6. **Using a CDN**: Serve static assets from a Content Delivery Network (CDN).
+7. **Optimizing Server-Side Rendering**: Ensure optimized server-side rendering.
+8. **Monitoring and Analyzing Performance**: Use performance monitoring tools to identify and fix bottlenecks.
+9. **Optimizing Database Queries**: Ensure optimized database queries if the chatbox interacts with a database.
+10. **Using Efficient Data Structures**: Choose appropriate data structures for storing and managing chat messages.

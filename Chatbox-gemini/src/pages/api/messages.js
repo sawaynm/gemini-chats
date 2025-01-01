@@ -1,20 +1,18 @@
-import { connectToDatabase } from '../../utils/db';
+let messages = [];
 
 export default async function handler(req, res) {
   const { method } = req;
 
   try {
-    const { db } = await connectToDatabase();
-
     switch (method) {
       case 'GET':
-        const messages = await db.collection('messages').find({}).toArray();
         res.status(200).json(messages);
         break;
 
       case 'POST':
         const { message } = req.body;
-        const newMessage = await db.collection('messages').insertOne({ message });
+        const newMessage = { id: messages.length + 1, message };
+        messages.push(newMessage);
         res.status(201).json(newMessage);
         break;
 

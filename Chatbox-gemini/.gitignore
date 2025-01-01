@@ -1,2 +1,13 @@
 .vercel
 .env.local
+
+# .gitignore
+.env
+.env.local
+.env.development
+.env.production
+node_modules/
+.vercel
+.next
+build
+dist

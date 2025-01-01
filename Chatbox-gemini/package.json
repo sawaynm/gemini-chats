@@ -1,31 +1,40 @@
 {
-  "name": "gemini-chat",
+  "name": "gemini-chatbox",
   "version": "1.0.0",
   "private": true,
-  "dependencies": {
-    "@types/node": "^22.10.2",
-    "@types/react": "^19.0.2",
-    "@types/react-dom": "^19.0.2",
-    "@vercel/node": "^3.0.0",
-    "axios": "^1.7.9",
-    "next": "^14.0.0",
-    "next-auth": "^4.24.11",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "socket.io": "^4.8.1",
-    "typescript": "^5.7.2"
-  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^14.2.22",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
+    "remark-gfm": "^4.0.0",
+    "emoji-dictionary": "^1.0.11",
+    "axios": "^1.6.2",
+    "uuid": "^9.0.1",
+    "next-auth": "^4.24.5"
   },
   "devDependencies": {
-    "@types/axios": "^0.9.36",
-    "@types/uuid": "^10.0.0",
-    "autoprefixer": "^10.4.20",
-    "tailwindcss": "^3.4.17",
-    "uuid": "^11.0.3"
+    "@types/node": "^20.10.4",
+    "@types/react": "^18.2.42",
+    "@types/react-dom": "^18.2.17",
+    "@types/uuid": "^9.0.7",
+    "typescript": "^5.3.3",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "eslint": "^8.55.0",
+    "eslint-config-next": "14.0.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }
